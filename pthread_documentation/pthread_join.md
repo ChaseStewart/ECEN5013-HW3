@@ -7,7 +7,6 @@ extern int pthread_join (pthread_t __th, void **__thread_return);
 
 ## Parameters
 * pthread_t __th: the pthread that the caller wishes to join with. Once "thread" terminates, it will be guaranteedly terminated 
-
 * void **__thread_return: after concluding the join, "retval" will hold whatever was returned by "thread" when it called pthread_exit.
 
 ## Description

@@ -1,13 +1,20 @@
-# Function Name
-A one-sentence description of what this function does
+# pthread_cond_init
+create a condition variable using the provided attributes or else defaults
+
+```
+extern int pthread_cond_init (pthread_cond_t *__restrict __cond,
+			      const pthread_condattr_t *__restrict __cond_attr)
+     __THROW __nonnull ((1));
+```
+
 
 ## Description
 This is the detailed description
 
 ## Parameters
-*Parameter 1: does something
-*Parameter 2: does something else
-*Parameter 3: does even something else
+* 1: does something
+* Parameter 2: does something else
+* Parameter 3: does even something else
 
 ## Outputs
 * Output: does something
