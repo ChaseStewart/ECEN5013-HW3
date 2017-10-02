@@ -10,11 +10,8 @@ extern int pthread_create (pthread_t *__restrict __newthread,
 
 ## Parameters
 * pthread_t *__restrict __newthread: this will store a handle to the new pthread 
-
 * const pthread_attr_t *__restrict __attr: A set of flags of type pthread_attr_t struct to be used in pthread creation 
-
 * void *(__start_routine) : the routine that the new pthread will run upon creation. If the pthread needs args for __start_routine, it must get them from the 'args' parameter below
-
 * void *__restrict __arg : a void pointer to any and all args needed by the '__start_routine' function
 
 ## Description

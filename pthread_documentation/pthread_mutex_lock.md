@@ -1,16 +1,19 @@
-# Function Name
-A one-sentence description of what this function does
+# pthread_mutex_lock
+Either lock mutex __mutex or else suspend the thread until __mutex is unlocked again.
+
+```
+extern int pthread_mutex_lock (pthread_mutex_t *__mutex)
+     __THROWNL __nonnull ((1));
+```
 
 ## Description
-This is the detailed description
+Attempt to lock the mutex- if the mutex is unlocked at that instant, it will become locked and will belong to this calling thread. If the mutex is instead locked, this function call will cause the calling thread to suspend until the mutex is locked. For a non-blocking similar call, please look at pthread_mutex_trylock 
 
 ## Parameters
-*Parameter 1: does something
-*Parameter 2: does something else
-*Parameter 3: does even something else
+* pthread_mutex_t *__mutex: A handle of the mutex which should be locked.
 
 ## Outputs
-* Output: does something
+* int: return the status of pthread_mutex_lock
 
 ## example code
 to run the command

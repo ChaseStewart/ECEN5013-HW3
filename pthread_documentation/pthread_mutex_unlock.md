@@ -1,16 +1,19 @@
-# Function Name
-A one-sentence description of what this function does
+# pthread_mutex_unlock
+Attempt to unlock mutex __mutex 
+
+```
+extern int pthread_mutex_unlock (pthread_mutex_t *__mutex)
+     __THROWNL __nonnull ((1));
+```
 
 ## Description
-This is the detailed description
+Attempt to unlock the mutex- depending on the type of mutex, this function will either check whether the mutex is locked and owned by the caller (the combination of these is proper state for a call to mutex_unlock), or just blindly set it to unlocked. If the mutex type does check the ownership and lock-state of the mutex and finds either to be improper for this call, it will return an error.
 
 ## Parameters
-*Parameter 1: does something
-*Parameter 2: does something else
-*Parameter 3: does even something else
+* pthread_mutex_t *__mutex: A handle of the mutex which should be unlocked.
 
 ## Outputs
-* Output: does something
+* int: return the status of pthread_mutex_unlock
 
 ## example code
 to run the command
