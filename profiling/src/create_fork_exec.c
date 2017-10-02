@@ -34,17 +34,19 @@ int main(void){
 	}
 	else
 	{
-		
+		/* have child process use execlp to call "ls" */		
 		if (my_pid == IS_CHILD)
 		{
 			printf("[profile-fork-exec][child] running \"ls\"\n");
 			execlp("/bin/ls", "ls", NULL);
 		}
+
+		/* have parent process wait for child, then stop the clock and print results */		
 		else
 		{
 			printf("[profile-fork-exec][parent] waiting for child\n");
 			wait(NULL);
-		
+	
 			/* capture exec_end time */
 			my_end = clock();
 			printf("[profile-fork-exec][parent] stop clock\n");
@@ -53,7 +55,9 @@ int main(void){
 				/* failed to get CPU ticks */
 				printf("[profile-fork-exec] failed to get fork_start time\n");
 			}
-			my_time = my_end - my_start;
+
+			/*calculate and print delta time */
+			my_time = (float)my_end - (float) my_start;
 			printf("[profile-fork-exec] fork CPU time was %f\n", my_time);
 		}
 		return 0;
