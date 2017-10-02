@@ -7,17 +7,16 @@ extern int pthread_cond_init (pthread_cond_t *__restrict __cond,
      __THROW __nonnull ((1));
 ```
 
-
 ## Description
-This is the detailed description
+This function initializes the pthread_cond_t pointed to by __cond using the given parameters in __cond_attr. If 
+__cond_attr is blank, pthread_cond_init will use the default parameters to initialize.
 
 ## Parameters
-* 1: does something
-* Parameter 2: does something else
-* Parameter 3: does even something else
+* pthread_cond_t *__restrict __cond: the variable where the created cond will be returned
+* const pthread_condattr_t *__restrict __cond_attr: the struct that holds the attrs one would like to be initialized in the cond variable 
 
 ## Outputs
-* Output: does something
+* int: a status integer 
 
 ## example code
 to run the command

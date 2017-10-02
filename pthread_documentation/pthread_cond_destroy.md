@@ -1,16 +1,19 @@
-# Function Name
-A one-sentence description of what this function does
+# pthread_cond_destroy 
+destroy and free condition variable __cond
+
+```
+extern int pthread_cond_destroy (pthread_cond_t *__cond)
+     __THROW __nonnull ((1));
+```
 
 ## Description
-This is the detailed description
+This destroys condition variable __cond and frees any resources if need be. The condition must not have any threads waiting on it for destroy to succeed- if there are still threads waiting on this, pthread_cond_destroy will return an error.
 
 ## Parameters
-*Parameter 1: does something
-*Parameter 2: does something else
-*Parameter 3: does even something else
+* pthread_cond_t *__cond: A pointer to the condition variable of type pthread_cond_t which one wants destroyed
 
 ## Outputs
-* Output: does something
+* int: a status variable from the destroy attempt 
 
 ## example code
 to run the command
