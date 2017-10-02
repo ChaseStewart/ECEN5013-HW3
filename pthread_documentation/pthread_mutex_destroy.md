@@ -1,16 +1,19 @@
-# Function Name
-A one-sentence description of what this function does
+# pthread_mutex_destroy 
+Destroy the given mutex __mutex and free all resources
+
+```
+extern int pthread_mutex_destroy (pthread_mutex_t *__mutex)
+     __THROW __nonnull ((1));
+```
 
 ## Description
-This is the detailed description
+This function destroys mutex __mutex if possible and frees its resources. The given mutex must be unlocked for this function to succeed- else it will return an error.
 
-## Parameters
-*Parameter 1: does something
-*Parameter 2: does something else
-*Parameter 3: does even something else
+# Paraneters
+* pthread_mutex_t *__mutex: a handle to the mutex to be destroyed
 
 ## Outputs
-* Output: does something
+* int: return int status of pthread_mutex_destroy
 
 ## example code
 to run the command

@@ -1,16 +1,19 @@
-# Function Name
-A one-sentence description of what this function does
+# pthread_mutex_trylock
+Either lock mutex __mutex or else instantly return an error code without blocking 
+
+```
+extern int pthread_mutex_trylock (pthread_mutex_t *__mutex)
+     __THROWNL __nonnull ((1));
+```
 
 ## Description
-This is the detailed description
+Attempt to lock the mutex- if the mutex is unlocked at that instant, it will become locked and will belong to this calling thread, and this function will return success. If the mutex is locked at that instant, this function will not block- it will instead return with an error code for EBUSY.  
 
 ## Parameters
-*Parameter 1: does something
-*Parameter 2: does something else
-*Parameter 3: does even something else
+* pthread_mutex_t *__mutex: A handle of the mutex which should be locked.
 
 ## Outputs
-* Output: does something
+* int: return the status of pthread_mutex_lock
 
 ## example code
 to run the command
@@ -22,5 +25,7 @@ retval = run_command(parameter1, parameter2);
 /* retval should equal 0 */
 
 ```
+
+
 
 
