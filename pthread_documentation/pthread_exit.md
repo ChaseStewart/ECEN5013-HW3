@@ -1,7 +1,10 @@
 # pthread_exit 
 Terminate the calling thread and return a value to the joining process if applicable.
 
-`void pthread_exit(void *retval);`
+```
+extern void pthread_exit (void *__retval) __attribute__ ((__noreturn__));
+```
+
 
 ## Description
 This is the clean way to terminate a thread, called by the thread itself. As a programmer, one would have the thread call pthread_exit when a given thread\'s task is complete
