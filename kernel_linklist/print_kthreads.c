@@ -3,34 +3,42 @@
 #include <linux/sched/signal.h>
 #include <linux/init.h>
 #include <linux/slab.h>
+//#include <linux/plist.h>
 
 int print_kernel_threads(void)
 {
-	struct task_struct *my_linklist;
+	struct task_struct *my_taskstruct;
 	int my_task_state, my_num_children;
+	struct list_head *current_node;
 	pid_t my_pid;
 	char *my_task_name;
-	
 
-	
-	printk("[print_kthread_ids] Starting module!\n");
+	printk("[print_kthread_ids] Initializing module!\n");
 	my_task_name = (char *)kmalloc(2048*sizeof(char), GFP_KERNEL);
 
 	/* For each process in linux processes, get name, pid, status, num_children */
-	for_each_process(my_linklist){	
-		/* if my_pid = getpid*/
-		my_task_state = my_linklist->state;
-		my_pid        = my_linklist->pid;
+	for_each_process(my_taskstruct){	
+		/* get args from the task_struct*/
+		my_task_state = my_taskstruct->state;
+		my_pid        = my_taskstruct->pid;
+		sprintf(my_task_name, my_taskstruct->comm);
 		my_num_children = 0;
-		sprintf(my_task_name, my_linklist->comm);
-	
+
+
+		/* use macro to get num children*/
+		list_for_each(current_node, &my_taskstruct->children)
+		{
+			my_num_children++;
+		}
+
 		/* pull name, thread_id, status, then recursively grab children */ 
-		printk("[print_kthread_ids][%d] name:%s, status:%d, num_children:%d \n", 
+		printk("[print_kthread_ids][%d] name:%s, status:%d, num_children:%d \n", \
 								my_pid,        \
 								my_task_name,  \
 								my_task_state, \
 								my_num_children);
 	}
+	printk("[print_kthread_ids] End of list!\n");
 	return 0;
 }
 
