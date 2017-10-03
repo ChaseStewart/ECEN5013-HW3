@@ -16,6 +16,7 @@
 #define INPUT_LEN     4096
 #define CHAR_SPACE    32
 #define CHAR_NEWLINE  10
+#define CHAR_CR       13
 
 static volatile int thread1_state = IS_RUNNING; 
 static volatile int thread2_state = IS_RUNNING; 
@@ -41,6 +42,7 @@ void sig_handler(int my_signal)
 	{
 		printf("\n[multithread_io] USR1 was sent!\n");
 		signal(SIGUSR1, sig_handler);
+		/* TODO signal this guy to run*/
 		thread2_state = THREAD1_PRINT;
 	}
 	else if (my_signal == SIGUSR2)
@@ -57,7 +59,6 @@ void sig_handler(int my_signal)
 		thread2_state = IS_STOPPED;
 		thread3_state = IS_STOPPED;
 	}
-	//fflush(stdout);	
 }
 
 
@@ -75,6 +76,7 @@ void *thread_two_main(void *in_file_name)
 
 	my_file_name = (char *)in_file_name;
 	in_file = fopen(my_file_name, "r");
+	printf("[thread2] opened file %s\n", my_file_name);
 	while(c != EOF)
 	{
 		c = fgetc(in_file);
@@ -88,13 +90,14 @@ void *thread_two_main(void *in_file_name)
 			num_lines++;
 		}
 	}
-	printf("thread 2 dead!\n");
+	printf("[thread2] num_chars: %d\tnum_words: %d\tnum_lines: %d\n", num_chars, num_words, num_lines);
+	printf("[thread2] thread 2 dead!\n");
+	fclose(in_file);
 	return NULL;
 }
 
 void *thread_three_main(void *in_file_name)
 {
-	while(thread3_state == IS_RUNNING);
 	printf("thread 3 dead!\n");
 	return NULL;
 }
@@ -106,20 +109,23 @@ int main(int argc, char *argv[])
 	char input_char;
 	FILE *out_file;
 	pthread_t thread_two, thread_three;
-	
+
+	/* hijack all signals to this handler */	
 	signal(SIGINT,  sig_handler);
 	signal(SIGUSR1, sig_handler);
 	signal(SIGUSR2, sig_handler);
 	signal(SIGTERM, sig_handler);
+	
 	out_file = NULL;
 
-	curr_arg = 0;
+	/* parse args */
 	if (argc == 1)
 	{
 		my_print_help();
 		return 0;
 	}
 
+	curr_arg = 0;
 	while (curr_arg >= 0)
 	{
 		curr_arg = getopt_long(argc, argv, "f:h", options, NULL);
@@ -143,6 +149,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	/* open the file for writing */
 	out_file = fopen(out_file_name, "a");
 	if (out_file == NULL)
 	{
@@ -158,24 +165,42 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	/* Initialize thread3 */
+	/* initialize thread3 */
 	if (pthread_create(&thread_three, NULL, thread_three_main, out_file_name) != 0)
 	{
 		printf("Failed to create thread 3!\n");
 		return 1;
 	}
-
+	
 	/* Run the main thread0 process*/
 	printf("Please type input:\n");
 	while (thread1_state == IS_RUNNING)
 	{
 		input_char = getchar();
 		putchar(input_char);
-		if (input_char >= 0)
+
+		if (input_char > 0)
 		{
 			fputc(input_char,out_file);
 		}
-		fclose(out_file);
 	}
+
+	fclose(out_file);
+
+	/* on close, reap thread_two */
+	if (pthread_join(thread_two, NULL) != 0)
+	{
+		printf("failed to reap thread 2\n");
+		return 1;
+	}
+	
+	/* on close, reap thread_three */
+	if (pthread_join(thread_three, NULL) != 0)
+	{
+		printf("failed to reap thread 3\n");
+		return 1;
+	}
+
+	printf("Sucessfully reaped all threads\n");
 	return 0;
 }
