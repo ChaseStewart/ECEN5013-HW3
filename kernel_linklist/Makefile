@@ -1,17 +1,7 @@
-CC=gcc
+obj-m += print_kthreads.o
 
-CFLAGS= -g -std=c99 -Werror -Wall -pthread
-
-IPATH  = -I./inc 
-
-LIBS=
-
-all: 
-	$(CC) $(CFLAGS) $(IPATH) get_kthreads.c $(LIBS) -o get_kthreads
-	@echo Built get_kthreads
-
-.PHONY: clean
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(shell pwd) modules
 
 clean:
-	@rm -vf fork_vs_exec pthread_create kthread_create
-	@echo All functions removed!
+	make -C /lib/modules/$(shell uname -r)/build M=$(shell pwd) clean
