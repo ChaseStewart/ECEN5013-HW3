@@ -25,10 +25,12 @@ static struct option options[] = {
 void thread_two_main(void *in_file_name)
 {
 	int num_chars, num_words, num_lines;
+	char *my_file_name;
+	char c; 
 	FILE *in_file;
 
-	in_file = fopen(in_file_name, "r");
-	char c; 
+	my_file_name = (char *)in_file_name;
+	in_file = fopen(my_file_name, "r");
 	while(c != EOF)
 	{
 		c = fgetc(in_file);
@@ -63,6 +65,7 @@ int main(int argc, char *argv[])
 		my_print_help();
 		return 0;
 	}
+
 	while (curr_arg >= 0)
 	{
 		curr_arg = getopt_long(argc, argv, "f:h", options, NULL);
@@ -74,8 +77,7 @@ int main(int argc, char *argv[])
 		{
 			/* get filename*/
 			case 'f':
-				/*  get the actual arg dum dum */
-				
+				/*  get the actual arg */
 				strcpy(out_file_name, optarg);
 				break;
 
@@ -87,17 +89,17 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	/* Initialize the processing thread */
 	printf("[multithread_io] Filename is %s\n", out_file_name);
 
-	/* Initialize the processing thread */
 	
-	/* Start the reporting thread */
-	
-	out_file = fopen(out_file_name, "w");
+	printf("[multithread_io] File %s opened: Please type input:\n\n", out_file_name);
 	while (my_state == IS_RUNNING)
 	{
 		input_char = getchar();
+		out_file = fopen(out_file_name, "w");
 		fputc(input_char,out_file);
+		fclose(out_file);
 		putchar(input_char);
 	}
 }
