@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <pthread.h>
 
-
 void *my_hello(void *void_tid)
 {
 	int thread_id;
@@ -58,7 +57,7 @@ int main(void)
 
 	/* calculate and print delta time */
 	pthread_time = (float) pthread_end - (float) pthread_start;
-	printf("[profile-pthread][main] pthread CPU time was %f ", pthread_time);
+	printf("[profile-pthread][main] pthread CPU time was %f\n", pthread_time);
 	return 0;
 }
 

@@ -3,8 +3,6 @@ CC=gcc
 CFLAGS= -g -std=c99 -Werror -Wall -pthread
 
 IPATH  = -I./inc 
-IPATH += -I../../Unity/src
-IPATH += -I./test
 
 LIBS=
 
