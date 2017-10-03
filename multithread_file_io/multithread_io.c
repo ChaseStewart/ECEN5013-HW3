@@ -49,6 +49,7 @@ void sig_handler(int my_signal)
 	{
 		printf("\n[multithread_io] USR2 was sent!\n");
 		signal(SIGUSR2, sig_handler);
+		/* TODO signal this guy to run*/
 		thread2_state = THREAD2_PRINT;
 	}
 	else if (my_signal == SIGINT)
@@ -76,7 +77,7 @@ void *thread_two_main(void *in_file_name)
 
 	my_file_name = (char *)in_file_name;
 	in_file = fopen(my_file_name, "r");
-	printf("[thread2] opened file %s\n", my_file_name);
+	printf("[multithread_io][thread2] opened file %s\n", my_file_name);
 	while(c != EOF)
 	{
 		c = fgetc(in_file);
@@ -90,15 +91,15 @@ void *thread_two_main(void *in_file_name)
 			num_lines++;
 		}
 	}
-	printf("[thread2] num_chars: %d\tnum_words: %d\tnum_lines: %d\n", num_chars, num_words, num_lines);
-	printf("[thread2] thread 2 dead!\n");
+	printf("[multithread_io][thread2] ***FILE STATS ***\n\tnum_chars: %d\tnum_words: %d\tnum_lines: %d\n\n", num_chars, num_words, num_lines);
+	printf("[multithread_io][thread2] thread 2 dead!\n");
 	fclose(in_file);
 	return NULL;
 }
 
 void *thread_three_main(void *in_file_name)
 {
-	printf("thread 3 dead!\n");
+	printf("[multithread_io][thread3] thread 3 dead!\n");
 	return NULL;
 }
 
@@ -153,27 +154,27 @@ int main(int argc, char *argv[])
 	out_file = fopen(out_file_name, "a");
 	if (out_file == NULL)
 	{
-		printf("\nERROR: Failed to open file! Closing...\n");
+		printf("\n[multithread_io][thread1] ERROR: Failed to open file! Closing...\n");
 		exit(1);
 	}
-	printf("[multithread_io] File %s opened\n", out_file_name);
+	printf("[multithread_io][thread1] File %s opened\n", out_file_name);
 	
 	/* Initialize thread2 */
 	if (pthread_create(&thread_two, NULL, thread_two_main, out_file_name) != 0)
 	{
-		printf("Failed to create thread 2!\n");
+		printf("[multithread_io][thread1] Failed to create thread 2!\n");
 		return 1;
 	}
 	
 	/* initialize thread3 */
 	if (pthread_create(&thread_three, NULL, thread_three_main, out_file_name) != 0)
 	{
-		printf("Failed to create thread 3!\n");
+		printf("[multithread_io][thread1] Failed to create thread 3!\n");
 		return 1;
 	}
 	
 	/* Run the main thread0 process*/
-	printf("Please type input:\n");
+	printf("\tPlease type input:\n");
 	while (thread1_state == IS_RUNNING)
 	{
 		input_char = getchar();
@@ -190,17 +191,17 @@ int main(int argc, char *argv[])
 	/* on close, reap thread_two */
 	if (pthread_join(thread_two, NULL) != 0)
 	{
-		printf("failed to reap thread 2\n");
+		printf("[multithread_io][thread1] failed to reap thread 2\n");
 		return 1;
 	}
 	
 	/* on close, reap thread_three */
 	if (pthread_join(thread_three, NULL) != 0)
 	{
-		printf("failed to reap thread 3\n");
+		printf("[multithread_io][thread1] failed to reap thread 3\n");
 		return 1;
 	}
 
-	printf("Sucessfully reaped all threads\n");
+	printf("[multithread_io][thread1] Sucessfully reaped all threads\n");
 	return 0;
 }
