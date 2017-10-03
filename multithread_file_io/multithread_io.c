@@ -1,15 +1,31 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <getopt.h>
+#include <signal.h>
 
 #define IS_RUNNING 0
 #define IS_STOPPED 1
 #define INPUT_LEN 4096
 #define CHAR_SPACE 32
 #define CHAR_NEWLINE 10
+
+static volatile int thread0_state = IS_RUNNING; 
+static volatile int thread1_state = IS_RUNNING; 
+static volatile int thread2_state = IS_RUNNING; 
+
+void ctrlcHandler(int my_signal)
+{
+	if (my_signal == SIGINT)
+	{
+		signal(SIGINT, ctrlcHandler);
+		thread0_state = IS_STOPPED;
+	}
+}
+
 
 void my_print_help(void)
 {
@@ -53,12 +69,14 @@ void thread_three_main(void *in_file_name)
 
 int main(int argc, char *argv[])
 {
-	int my_state, curr_arg;
-	char out_file_name[4096];
+	int  curr_arg;
+	char out_file_name[INPUT_LEN];
 	char input_char;
 	FILE *out_file;
+	
+	out_file = NULL;
+	signal(SIGINT, ctrlcHandler);
 
-	my_state = IS_RUNNING;
 	curr_arg = 0;
 	if (argc == 1)
 	{
@@ -94,13 +112,24 @@ int main(int argc, char *argv[])
 
 	
 	printf("[multithread_io] File %s opened: Please type input:\n\n", out_file_name);
-	while (my_state == IS_RUNNING)
+
+	while (thread0_state == IS_RUNNING)
 	{
 		input_char = getchar();
-		out_file = fopen(out_file_name, "w");
-		fputc(input_char,out_file);
-		fclose(out_file);
 		putchar(input_char);
+		out_file = fopen(out_file_name, "a");
+		if (out_file == NULL)
+		{
+			printf("\nERROR: Failed to open file! Closing...\n");
+			exit(1);
+		}
+		if (input_char >= 0)
+		{
+			fputc(input_char,out_file);
+		}
+		fclose(out_file);
 	}
+	printf("[multithread_io] CTRL+C was pressed! Goodbye...\n");
+	return 0;
 }
 
