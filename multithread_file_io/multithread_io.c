@@ -1,41 +1,7 @@
-#include <pthread.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <getopt.h>
-#include <signal.h>
-
-/* state variables */
-#define IS_RUNNING    0
-#define IS_STOPPED    1
-
-#define INPUT_LEN     4096
-
-/* char values */
-#define CHAR_CR       13
-#define CHAR_NEWLINE  10
-#define CHAR_SPACE    32
-
-/* set globals for thread states */
-static volatile int thread1_state = IS_RUNNING; 
-static volatile int thread2_state = IS_RUNNING; 
-static volatile int thread3_state = IS_RUNNING; 
+#include "multithread_io.h"
 
 /* SIGUSR1 SIGUSR2 mutexes and condition variables */
-static  pthread_cond_t usr1_cv;
-static  pthread_cond_t usr2_cv;
-static  pthread_mutex_t usr1_mutex;
-static  pthread_mutex_t usr2_mutex;
-
-/* command-line options */
-static struct option options[] = {
-	{"filename", required_argument, NULL, 'f'},
-	{"help", no_argument, NULL, 'h'},
-	{NULL, 0, 0, 0}
-};
-
+static volatile struct tty_stats *my_stats;
 
 void sig_handler(int my_signal)
 {
@@ -85,17 +51,21 @@ void my_print_help(void)
 	printf("Usage: multithreadIO [-f] filename [-h]\n");
 }
 
-void *thread_two_main(void *in_file_name)
-{
-	int num_chars, num_words, num_lines;
-	char *my_file_name;
-	char c; 
-	FILE *in_file;
 
-	my_file_name = (char *)in_file_name;
+void *thread_two_main(void *thread_two_struct)
+{
+	struct my_thread_info *data_struct;
+	struct tty_stats *thread_two_stats;
+	char *my_file_name;
+	FILE *in_file;
+	char c; 
+
+	data_struct = (struct my_thread_info *)thread_two_struct;
+	my_file_name = data_struct->file_name;
+	thread_two_stats = &data_struct->stats;
+
 	in_file = fopen(my_file_name, "r");
 	printf("[multithread_io][thread2] opened file %s\n", my_file_name);
-
 
 	/* Loop until this state is set to IS_STOPPED by sigint_handler */
 	while(thread2_state == IS_RUNNING)
@@ -115,14 +85,15 @@ void *thread_two_main(void *in_file_name)
 		while(c != EOF)
 		{
 			c = fgetc(in_file);
-			num_chars++;
+			thread_two_stats->num_chars++;
 			if (c == CHAR_SPACE)
 			{
-				num_words++;
+				/* TODO fixme get real words not just spaces */
+				thread_two_stats->num_words++;
 			}
 			else if (c == CHAR_NEWLINE)
 			{
-				num_lines++;
+				thread_two_stats->num_lines++;
 			}
 		}
 	}
@@ -132,21 +103,37 @@ void *thread_two_main(void *in_file_name)
 	return NULL;
 }
 
-void *thread_three_main(void *in_file_name)
+void *thread_three_main(void *thread_three_struct)
 {
 	int local_chars, local_words, local_lines;
+	struct my_thread_info *data_struct;
+	struct tty_stats *thread_three_stats;
+	
+	data_struct = (struct my_thread_info *)thread_three_struct;
+	thread_three_stats = &data_struct->stats;
 
 	while(thread3_state == IS_RUNNING)
 	{
 		/* wait for signal */
 		pthread_cond_wait(&usr2_cv, &usr2_mutex);
-		printf("[multithread_io][thread3] Hello from thread 3!\n");
+
+		/* don't run the last time if stopped  */
+		if(thread3_state == IS_STOPPED)
+		{
+			printf("[multithread_io][thread3] thread 3 dead!\n");
+			return NULL;
+		}
 
 
-		printf("[multithread_io][thread2] ***FILE STATS ***\n\tnum_chars: %d\tnum_words: %d\tnum_lines: %d\n\n", num_chars, num_words, num_lines);
+		local_chars = thread_three_stats->num_chars;
+		local_words = thread_three_stats->num_words;
+		local_lines = thread_three_stats->num_lines;
+
+		printf("[multithread_io][thread3] ***FILE STATS ***\n\tnum_chars: %d\tnum_words: %d\tnum_lines: %d\n\n", local_chars, local_words, local_lines);
 		
 	}
-	printf("[multithread_io][thread3] thread 3 dead!\n");
+	/* you really should never get here*/
+	printf("[multithread_io][thread3] thread 3 dead- should not get here!\n");
 	return NULL;
 }
 
@@ -157,6 +144,8 @@ int main(int argc, char *argv[])
 	char input_char;
 	FILE *out_file;
 	pthread_t thread_two, thread_three;
+	//struct tty_stats *my_stats;
+	struct my_thread_info *thread_info;
 
 	/* hijack all signals to this handler */	
 	signal(SIGINT,  sig_handler);
@@ -171,6 +160,12 @@ int main(int argc, char *argv[])
 	pthread_mutex_init(&usr2_mutex, NULL);
 
 	out_file = NULL;
+
+	/* allocate tty_stats struct */
+	my_stats = (struct tty_stats *)malloc(sizeof(struct tty_stats));
+	my_stats->num_chars =0;
+	my_stats->num_words =0;
+	my_stats->num_lines =0;
 
 	/* parse args */
 	if (argc == 1)
@@ -212,15 +207,19 @@ int main(int argc, char *argv[])
 	}
 	printf("[multithread_io][thread1] File %s opened\n", out_file_name);
 	
+	thread_info = (struct my_thread_info *)malloc(sizeof(struct my_thread_info));
+	thread_info->file_name  = out_file_name;
+	thread_info->stats = *my_stats;
 	/* Initialize thread2 */
-	if (pthread_create(&thread_two, NULL, thread_two_main, out_file_name) != 0)
+	
+	if (pthread_create(&thread_two, NULL, thread_two_main, thread_info) != 0)
 	{
 		printf("[multithread_io][thread1] Failed to create thread 2!\n");
 		return 1;
 	}
 	
 	/* initialize thread3 */
-	if (pthread_create(&thread_three, NULL, thread_three_main, out_file_name) != 0)
+	if (pthread_create(&thread_three, NULL, thread_three_main, thread_info) != 0)
 	{
 		printf("[multithread_io][thread1] Failed to create thread 3!\n");
 		return 1;
