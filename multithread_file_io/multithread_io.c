@@ -12,32 +12,37 @@
 #define IS_STOPPED    1
 
 #define INPUT_LEN     4096
-#define CHAR_SPACE    32
-#define CHAR_NEWLINE  10
-#define CHAR_CR       13
 
+/* char values */
+#define CHAR_CR       13
+#define CHAR_NEWLINE  10
+#define CHAR_SPACE    32
+
+/* set globals for thread states */
 static volatile int thread1_state = IS_RUNNING; 
 static volatile int thread2_state = IS_RUNNING; 
 static volatile int thread3_state = IS_RUNNING; 
 
+/* SIGUSR1 SIGUSR2 mutexes and condition variables */
 static  pthread_cond_t usr1_cv;
 static  pthread_cond_t usr2_cv;
-
 static  pthread_mutex_t usr1_mutex;
 static  pthread_mutex_t usr2_mutex;
 
-
+/* command-line options */
 static struct option options[] = {
 	{"filename", required_argument, NULL, 'f'},
 	{"help", no_argument, NULL, 'h'},
 	{NULL, 0, 0, 0}
 };
 
+
 void sig_handler(int my_signal)
 {
+	/* For SIGTERM, stop all threads gracefully */
 	if (my_signal == SIGTERM)
 	{
-		printf("\n[multithread_io] pkill was sent! Goodbye...\n");
+		printf("\n[multithread_io] pkill was sent!\n");
 		signal(SIGTERM, sig_handler);
 		thread1_state = IS_STOPPED;
 		thread2_state = IS_STOPPED;
@@ -45,12 +50,14 @@ void sig_handler(int my_signal)
 		thread3_state = IS_STOPPED;
 		pthread_cond_signal(&usr2_cv);
 	}
+	/* For SIGUSR1, have thread_two count stats */
 	else if (my_signal == SIGUSR1)
 	{
 		printf("\n[multithread_io] USR1 was sent!\n");
 		signal(SIGUSR1, sig_handler);
 		pthread_cond_signal(&usr1_cv);
 	}
+	/* For SIGUSR2, have thread_three count stats */
 	else if (my_signal == SIGUSR2)
 	{
 		printf("\n[multithread_io] USR2 was sent!\n");
@@ -58,6 +65,8 @@ void sig_handler(int my_signal)
 		pthread_cond_signal(&usr2_cv);
 		
 	}
+	
+	/* For SIGINT, stop all threads gracefully */
 	else if (my_signal == SIGINT)
 	{
 		printf("\n[multithread_io] CTRL+C was pressed! Goodbye...\n");
@@ -87,10 +96,14 @@ void *thread_two_main(void *in_file_name)
 	in_file = fopen(my_file_name, "r");
 	printf("[multithread_io][thread2] opened file %s\n", my_file_name);
 
+
+	/* Loop until this state is set to IS_STOPPED by sigint_handler */
 	while(thread2_state == IS_RUNNING)
 	{
-		/* wait for signal */
+		/* wait for USR1 signal from sigint_handler */
 		pthread_cond_wait(&usr1_cv, &usr1_mutex);
+		
+		/* don't run the last time if stopped  */
 		if(thread2_state == IS_STOPPED)
 		{
 			printf("[multithread_io][thread2] thread 2 dead!\n");
@@ -98,6 +111,7 @@ void *thread_two_main(void *in_file_name)
 			return NULL;
 		}
 
+		/* read the whole file, increment vars  */
 		while(c != EOF)
 		{
 			c = fgetc(in_file);
@@ -111,18 +125,25 @@ void *thread_two_main(void *in_file_name)
 				num_lines++;
 			}
 		}
-		printf("[multithread_io][thread2] ***FILE STATS ***\n\tnum_chars: %d\tnum_words: %d\tnum_lines: %d\n\n", num_chars, num_words, num_lines);
 	}
+	/* Should never get here, but clean up anyways  */
+	printf("[multithread_io][thread2] thread 2 dead- should never get here!\n");
+	fclose(in_file);
 	return NULL;
 }
 
 void *thread_three_main(void *in_file_name)
 {
+	int local_chars, local_words, local_lines;
+
 	while(thread3_state == IS_RUNNING)
 	{
 		/* wait for signal */
 		pthread_cond_wait(&usr2_cv, &usr2_mutex);
 		printf("[multithread_io][thread3] Hello from thread 3!\n");
+
+
+		printf("[multithread_io][thread2] ***FILE STATS ***\n\tnum_chars: %d\tnum_words: %d\tnum_lines: %d\n\n", num_chars, num_words, num_lines);
 		
 	}
 	printf("[multithread_io][thread3] thread 3 dead!\n");
