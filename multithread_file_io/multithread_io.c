@@ -124,14 +124,17 @@ void *thread_three_main(void *thread_three_struct)
 			return NULL;
 		}
 
-
+		
+		pthread_mutex_lock(&global_mutex, NULL);
 		local_chars = thread_three_stats->num_chars;
 		local_words = thread_three_stats->num_words;
 		local_lines = thread_three_stats->num_lines;
-
+		pthread_mutex_unlock(&global_mutex, NULL);
+		
 		printf("[multithread_io][thread3] ***FILE STATS ***\n\tnum_chars: %d\tnum_words: %d\tnum_lines: %d\n\n", local_chars, local_words, local_lines);
 		
 	}
+
 	/* you really should never get here*/
 	printf("[multithread_io][thread3] thread 3 dead- should not get here!\n");
 	return NULL;
@@ -144,20 +147,22 @@ int main(int argc, char *argv[])
 	char input_char;
 	FILE *out_file;
 	pthread_t thread_two, thread_three;
-	//struct tty_stats *my_stats;
 	struct my_thread_info *thread_info;
 
-	/* hijack all signals to this handler */	
+	/* hijack all signals to this handler */
 	signal(SIGINT,  sig_handler);
 	signal(SIGUSR1, sig_handler);
 	signal(SIGUSR2, sig_handler);
 	signal(SIGTERM, sig_handler);
 
+	/* instantiate SIGUSR cond/mutex */
 	pthread_cond_init(&usr1_cv, NULL);
 	pthread_cond_init(&usr2_cv, NULL);
-	
 	pthread_mutex_init(&usr1_mutex, NULL);
 	pthread_mutex_init(&usr2_mutex, NULL);
+
+	/*  */
+	pthread_mutex_init(&global_mutex, NULL);
 
 	out_file = NULL;
 

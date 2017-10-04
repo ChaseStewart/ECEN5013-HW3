@@ -20,15 +20,18 @@
 #define CHAR_SPACE    32
 
 /* set globals for thread states */
-static int thread1_state = IS_RUNNING; 
-static int thread2_state = IS_RUNNING; 
-static int thread3_state = IS_RUNNING; 
+static volatile int thread1_state = IS_RUNNING; 
+static volatile int thread2_state = IS_RUNNING; 
+static volatile int thread3_state = IS_RUNNING; 
 
 /* SIGUSR1 SIGUSR2 mutexes and condition variables */
 static pthread_cond_t usr1_cv;
 static pthread_cond_t usr2_cv;
 static pthread_mutex_t usr1_mutex;
 static pthread_mutex_t usr2_mutex;
+
+/* Stats mutex */
+static pthread_mutex_t global_mutex;
 
 /* struct for tty stats */
 struct tty_stats {
