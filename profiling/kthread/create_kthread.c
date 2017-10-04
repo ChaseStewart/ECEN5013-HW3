@@ -17,13 +17,18 @@ int get_kthread_time(void){
 	kthread_start = get_jiffies_64();	
 	
 	/* call kthread_create */
-	kthread_task = kthread_create(kthread_function, NULL, NULL);
+	kthread_task = kthread_create(kthread_function, NULL, "timed_kthread_example");
+	if (IS_ERR(kthread_task))
+	{
+		printk("[profile_kthreads] Error creating kthread! Exiting module!\n");
+		return 1;
+	}
 	wake_up_process(kthread_task);
 
 	kthread_end = get_jiffies_64();	
 	
 	kthread_time = (kthread_end - kthread_start);
-	printk("[profile_kthreads] kthread CPU time was %ld\n", kthread_time);
+	printk("[profile_kthreads] kthread start %ld end %ld CPU time was %ld\n", kthread_start, kthread_end, kthread_time);
 	return 0;
 }
 
