@@ -16,6 +16,6 @@ Once this function is called, the calling function will wait until thread __th t
 ## Outputs
 * int: pthread_join outputs its status via an int- a success is denoted by 0, while other errors can be determined by a nonzero error_number. 
 
-## How to Run
-To sucessfully run pthread_join, a few main things need to happen: pthread "thread" must already have been created via pthread_create and must currently exist.  
+## Notes 
+To sucessfully run pthread_join, a few main things need to happen: pthread "thread" must already have been created via pthread_create and must currently exist. This is the clean way to reap a thread- no matter if a pthread exists for a short time or the duration of a program, one should do this to one's created pthreads.
 

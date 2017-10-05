@@ -15,11 +15,6 @@ This is the clean way to terminate a thread, called by the thread itself. As a p
 ## Outputs
 * None: Returns Void 
 
-## example code
-TODO FIXME
-
-```bash
-TODO
-```
-
-
+## Notes
+A pthread may also exit by calling return() within its start function- also according to manpages,
+one should never confuse pthread_exit() with exit(), as exit() will close the whole program.

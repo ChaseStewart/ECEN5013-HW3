@@ -17,15 +17,5 @@ Once this command is called, calling thread will wait until pthread_cond_t __con
 ## Outputs
 * int: this int returns the status of the pthread_cond_wait.
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
-
+## Notes
+This is pretty straight-forward, have a thread wait in a suspended state until awoken

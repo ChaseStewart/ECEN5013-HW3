@@ -15,15 +15,5 @@ This function wakes up up-to-one thread which is waiting on condition __cond. If
 ## Outputs
 * int: an int of the return status of pthread_cond_signal
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
-
+## Notes 
+In order for this to function properly, it should be called on a pthread_condition_variable that has been initialized but not destroyed, and it should have a pthread at least attempting to wait for it (if none is waiting, this will just return, but if there is *never* a pthread waiting for this signal, you should re-evaluate your design). As for the difference between choosing cond_signal and cond_broadcast, ask yourself this: do you want this signal to wake up ANY ONE waiting thread or ALL waiting threads?

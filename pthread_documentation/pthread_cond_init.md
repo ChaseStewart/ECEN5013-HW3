@@ -18,15 +18,6 @@ __cond_attr is blank, pthread_cond_init will use the default parameters to initi
 ## Outputs
 * int: a status integer 
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
+## Notes
+If you plan to use pthread condition variables, this should be called on each variable and checked for success before using pthread_cond_wait or pthread_cond_signal/broadcast
 

@@ -15,15 +15,6 @@ This destroys condition variable __cond and frees any resources if need be. The 
 ## Outputs
 * int: a status variable from the destroy attempt 
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
-
+## Notes
+Think of this as equivalent to a free() of an initialized pthread condition variable. Anything that you pthread_cond_init should be freed via pthread_cond_destroy when you know that the condition variable is no longer needed.
+ 
