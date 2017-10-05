@@ -79,15 +79,57 @@ static struct option options[] = {
 
 /* prototypes */
 
-
+/*
+ * @brief print out 'help' for the program
+ *
+ * @param void 
+ *
+ * @return void
+ */
 void my_print_help(void);
 
+/*
+ * @brief handle chosen signals for program, signal or kill threads as needed  
+ *
+ * @param int my_signal- this holds the signal that caused this handler
+ *   valid signals can be SIGINT, SIGTERM, SIGUSR1, SIGUSR2
+ *
+ * @return void
+ */
 void sig_handler(int my_signal);
 
-void *thread_two_main(void *in_file_name);
+/*
+ * @brief main() function of thread_two: count chars/words/lines in file and update global struct
+ *
+ * @param void *thread_two_struct: holds a filename and a pointer to the global struct
+ * the filename is opened into a file_pointer for this thread to read, 
+ * and the global ref is updated with the counts 
+ *
+ * @return void 
+ */
+void *thread_two_main(void *thread_two_struct);
 
-void *thread_three_main(void *in_file_name);
+/*
+ * @brief main() function of thread_three: read global struct and print results to stdout 
+ *
+ *
+ * @param void *thread_three_struct: same as thread_two_struct, holds a filename 
+ * and a pointer to the global struct. The filename is ignored, 
+ * and the global ref is updated with the counts 
+ *
+ * @return circ_buff_status - enum of status
+ */
+void *thread_three_main(void *thread_three_struct);
 
+/*
+ * @brief create a circular buffer
+ *
+ *
+ * @param int argc: number of arguments provided to main
+ * @param char *argv[], a pointer to an array of input args- parsed for the filename
+ *
+ * @return an int status
+ */
 int main(int argc, char *argv[]);
 
 

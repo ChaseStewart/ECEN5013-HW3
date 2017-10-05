@@ -1,8 +1,36 @@
+/*****************************************************
+ * Redistribution, modification or use of this software in source or binary forms 
+ * is permitted as long as the files maintain this copyright. Users are permitted to 
+ * modify this and use it to learn about the field of embedded software but don't copy 
+ * my (Chase E Stewart's) work for class, I worked really hard on this. Alex Fosdick and 
+ * the University of Colorado and Chase E Stewart are not liable for any misuse of this material. 
+ * License copyright (C) 2017 originally from Alex Fosdick, code by Chase E Stewart.
+ *****************************************************/
+/**
+ * @file multithread_io.c
+ * @brief source code for the multithreaded file IO program
+ *
+ * 
+ *
+ * @author Chase E Stewart
+ * @date October 5 2017
+ * @version 1.1
+ *
+ */
+
 #include "multithread_io.h"
 
 /* SIGUSR1 SIGUSR2 mutexes and condition variables */
 static volatile struct tty_stats *my_stats;
 
+/*
+ * @brief handle chosen signals for program, signal or kill threads as needed  
+ *
+ * @param int my_signal- this holds the signal that caused this handler
+ *   valid signals can be SIGINT, SIGTERM, SIGUSR1, SIGUSR2
+ *
+ * @return void
+ */
 void sig_handler(int my_signal)
 {
 	/* For SIGTERM, stop all threads gracefully */
@@ -45,12 +73,28 @@ void sig_handler(int my_signal)
 	}
 }
 
+/*
+ * @brief print out 'help' for the program
+ *
+ * @param void 
+ *
+ * @return void
+ */
 void my_print_help(void)
 {
 	printf("Usage: multithreadIO [-f] filename [-h]\n");
 }
 
 
+/*
+ * @brief main() function of thread_two: count chars/words/lines in file and update global struct
+ *
+ * @param void *thread_two_struct: holds a filename and a pointer to the global struct
+ * the filename is opened into a file_pointer for this thread to read, 
+ * and the global ref is updated with the counts 
+ *
+ * @return void 
+ */
 void *thread_two_main(void *thread_two_struct)
 {
 	int local_chars, local_words, local_lines;
@@ -124,6 +168,16 @@ void *thread_two_main(void *thread_two_struct)
 	return NULL;
 }
 
+/*
+ * @brief main() function of thread_three: read global struct and print results to stdout 
+ *
+ *
+ * @param void *thread_three_struct: same as thread_two_struct, holds a filename 
+ * and a pointer to the global struct. The filename is ignored, 
+ * and the global ref is updated with the counts 
+ *
+ * @return circ_buff_status - enum of status
+ */
 void *thread_three_main(void *thread_three_struct)
 {
 	int local_chars, local_words, local_lines;
@@ -152,7 +206,8 @@ void *thread_three_main(void *thread_three_struct)
 		local_words = thread_three_stats->num_words;
 		local_lines = thread_three_stats->num_lines;
 		pthread_mutex_unlock(&global_mutex);
-		
+
+		/* now print results */		
 		printf("[multithread_io][thread3] ***FILE STATS ***\n\tnum_chars: %d\tnum_words: %d\tnum_lines: %d\n\n", local_chars, local_words, local_lines);
 		
 	}
@@ -162,6 +217,15 @@ void *thread_three_main(void *thread_three_struct)
 	return NULL;
 }
 
+/*
+ * @brief create a circular buffer
+ *
+ *
+ * @param int argc: number of arguments provided to main
+ * @param char *argv[], a pointer to an array of input args- parsed for the filename
+ *
+ * @return an int status
+ */
 int main(int argc, char *argv[])
 {
 	int  curr_arg;
@@ -194,16 +258,18 @@ int main(int argc, char *argv[])
 	my_stats->num_words =0;
 	my_stats->num_lines =0;
 
-	/* parse args */
+	/* if no args provided, print help and exit */
 	if (argc == 1)
 	{
 		my_print_help();
 		return 0;
 	}
 
+	/* now iterate through all args, switching on arg char */
 	curr_arg = 0;
 	while (curr_arg >= 0)
 	{
+		/* FYI options struct is in multithread_io.h */
 		curr_arg = getopt_long(argc, argv, "f:h", options, NULL);
 		if (curr_arg < 0 )
 		{
@@ -226,19 +292,14 @@ int main(int argc, char *argv[])
 	}
 
 	/* open the file for writing */
-	//out_file = fopen(out_file_name, "a");
-	//if (out_file == NULL)
-	//{
-	//	printf("\n[multithread_io][thread1] ERROR: Failed to open file! Closing...\n");
-	//	exit(1);
-	//}
-	//printf("[multithread_io][thread1] File %s opened\n", out_file_name);
-	
+
+
+	/* instantiate the thread_info struct */	
 	thread_info = (struct my_thread_info *)malloc(sizeof(struct my_thread_info));
 	thread_info->file_name  = out_file_name;
 	thread_info->stats = *my_stats;
-	/* Initialize thread2 */
-	
+
+	/* Initialize thread2 */	
 	if (pthread_create(&thread_two, NULL, thread_two_main, thread_info) != 0)
 	{
 		printf("[multithread_io][thread1] Failed to create thread 2!\n");
@@ -252,10 +313,11 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	/* Run the main thread0 process*/
+	/* Run the main thread0 process */
 	printf("\tPlease type input- only chars %d-%d are counted for char:\n", ASCII_START, ASCII_STOP);
 	while (thread1_state == IS_RUNNING)
 	{
+		/* get some chars, put them out to screen, if chars are valid, write them to file */
 		input_char = getchar();
 		putchar(input_char);
 	
@@ -286,6 +348,19 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	/* now exit once all are reaped */
 	printf("[multithread_io][thread1] Sucessfully reaped all threads\n");
+	
+	/* destroy from   */
+	pthread_cond_destroy(&usr1_cv);
+	pthread_cond_destroy(&usr2_cv);
+	pthread_mutex_destroy(&usr1_mutex);
+	pthread_mutex_destroy(&usr2_mutex);
+	pthread_mutex_destroy(&global_mutex);
+	free(thread_info);
+	printf("[multithread_io][thread1] Freed all global resources\n");
+	printf("[multithread_io][thread1] Goodbye!\n");
+
 	return 0;
 }
+
