@@ -1,10 +1,39 @@
+/*****************************************************
+ * Redistribution, modification or use of this software in source or binary forms 
+ * is permitted as long as the files maintain this copyright. Users are permitted to 
+ * modify this and use it to learn about the field of embedded software but don't copy 
+ * my (Chase E Stewart's) work for class, I worked really hard on this. Alex Fosdick and 
+ * the University of Colorado and Chase E Stewart are not liable for any misuse of this material. 
+ * License copyright (C) 2017 originally from Alex Fosdick, code by Chase E Stewart.
+ *****************************************************/
+/**
+ * @file print_kthreads.c
+ * @brief A kernel module to get all kthreads 
+ * 
+ * When this module is loaded, it iterates through
+ * the linklist of kernel tasks up to the init process 
+ * and prints formatted stats to stdout
+ * 
+ * @author Chase E Stewart
+ * @date October 5 2017
+ * @version 1.1
+ *
+ */
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/sched/signal.h>
 #include <linux/init.h>
 #include <linux/slab.h>
-//#include <linux/plist.h>
 
+
+/*
+ * @brief iterate from current task_struct to init  
+ * printing stats from the struct along the way
+ *
+ * @param void 
+ *
+ * @return int- return status of the function 
+ */
 int print_kernel_threads(void)
 {
 	struct task_struct *my_taskstruct;
@@ -13,6 +42,7 @@ int print_kernel_threads(void)
 	pid_t my_pid;
 	char *my_task_name;
 
+	/* allocate char array for task_struct->comm field */
 	printk("[print_kthread_ids] Initializing module!\n");
 	my_task_name = (char *)kmalloc(2048*sizeof(char), GFP_KERNEL);
 
@@ -24,7 +54,6 @@ int print_kernel_threads(void)
 		my_pid        = my_taskstruct->pid;
 		sprintf(my_task_name, my_taskstruct->comm);
 		my_num_children = 0;
-
 
 		/* use macro to get num children*/
 		list_for_each(current_node, &my_taskstruct->children)
@@ -40,9 +69,18 @@ int print_kernel_threads(void)
 								my_num_children);
 	}
 	printk("[print_kthread_ids] End of list!\n");
+	
+	kfree(my_task_name);
 	return 0;
 }
 
+/*
+ * @brief exit the module and print that exit occurred  
+ *
+ * @param void 
+ *
+ * @return void
+ */
 static void my_module_exit(void)
 {
 	printk("[print_kthread_ids] Exiting module!\n");
