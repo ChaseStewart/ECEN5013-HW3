@@ -85,6 +85,7 @@ void *thread_two_main(void *thread_two_struct)
 		while(c != EOF)
 		{
 			c = fgetc(in_file);
+			pthread_mutex_lock(&global_mutex);
 			thread_two_stats->num_chars++;
 			if (c == CHAR_SPACE)
 			{
@@ -95,6 +96,7 @@ void *thread_two_main(void *thread_two_struct)
 			{
 				thread_two_stats->num_lines++;
 			}
+			pthread_mutex_unlock(&global_mutex);
 		}
 	}
 	/* Should never get here, but clean up anyways  */
@@ -125,11 +127,11 @@ void *thread_three_main(void *thread_three_struct)
 		}
 
 		
-		pthread_mutex_lock(&global_mutex, NULL);
+		pthread_mutex_lock(&global_mutex);
 		local_chars = thread_three_stats->num_chars;
 		local_words = thread_three_stats->num_words;
 		local_lines = thread_three_stats->num_lines;
-		pthread_mutex_unlock(&global_mutex, NULL);
+		pthread_mutex_unlock(&global_mutex);
 		
 		printf("[multithread_io][thread3] ***FILE STATS ***\n\tnum_chars: %d\tnum_words: %d\tnum_lines: %d\n\n", local_chars, local_words, local_lines);
 		
@@ -161,7 +163,7 @@ int main(int argc, char *argv[])
 	pthread_mutex_init(&usr1_mutex, NULL);
 	pthread_mutex_init(&usr2_mutex, NULL);
 
-	/*  */
+	/* init the global  */
 	pthread_mutex_init(&global_mutex, NULL);
 
 	out_file = NULL;
