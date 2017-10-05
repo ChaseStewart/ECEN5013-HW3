@@ -45,7 +45,6 @@ void sig_handler(int my_signal)
 	}
 }
 
-
 void my_print_help(void)
 {
 	printf("Usage: multithreadIO [-f] filename [-h]\n");
@@ -59,7 +58,7 @@ void *thread_two_main(void *thread_two_struct)
 	struct tty_stats *thread_two_stats;
 	char *my_file_name;
 	FILE *in_file;
-	char c; 
+	char c, lastchar; 
 
 	data_struct = (struct my_thread_info *)thread_two_struct;
 	my_file_name = data_struct->file_name;
@@ -88,13 +87,20 @@ void *thread_two_main(void *thread_two_struct)
 		printf("[multithread_io][thread2] opened file %s\n", my_file_name);
 		fseek(in_file, 0, SEEK_SET);
 
+		lastchar = EOF;
 		c = 34;
 		/* read the whole file, increment vars  */
 		while(c != EOF)
 		{
 			c = fgetc(in_file);
+			if (c == EOF)
+			{
+				break;
+			}
 			local_chars++;
-			if (c == CHAR_SPACE)
+			
+			/* try to actually get words, not just spaces */
+			if ((c == CHAR_SPACE) && ( (lastchar != CHAR_SPACE) || (lastchar != CHAR_NEWLINE)))
 			{
 				local_words++;
 			}
@@ -108,6 +114,7 @@ void *thread_two_main(void *thread_two_struct)
 			thread_two_stats->num_words = local_words;
 			thread_two_stats->num_lines = local_lines;
 			pthread_mutex_unlock(&global_mutex);
+			lastchar = c;
 		}
 		fclose(in_file);
 	}

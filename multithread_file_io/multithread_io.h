@@ -1,3 +1,23 @@
+/*****************************************************
+ * Redistribution, modification or use of this software in source or binary forms 
+ * is permitted as long as the files maintain this copyright. Users are permitted to 
+ * modify this and use it to learn about the field of embedded software but don't copy 
+ * my (Chase E Stewart's) work for class, I worked really hard on this. Alex Fosdick and 
+ * the University of Colorado and Chase E Stewart are not liable for any misuse of this material. 
+ * License copyright (C) 2017 originally from Alex Fosdick, code by Chase E Stewart.
+ *****************************************************/
+/**
+ * @file multithread_io.h
+ * @brief header for the multithreaded file IO program
+ *
+ * 
+ *
+ * @author Chase E Stewart
+ * @date October 5 2017
+ * @version 1.1
+ *
+ */
+
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,7 +39,7 @@
 #define CHAR_NEWLINE  10
 #define CHAR_SPACE    32
 #define ASCII_START   32
-#define ASCII_STOP    127
+#define ASCII_STOP    126
 
 /* set globals for thread states */
 static volatile int thread1_state = IS_RUNNING; 
