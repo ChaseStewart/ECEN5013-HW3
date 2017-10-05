@@ -54,6 +54,7 @@ void my_print_help(void)
 
 void *thread_two_main(void *thread_two_struct)
 {
+	int local_chars, local_words, local_lines;
 	struct my_thread_info *data_struct;
 	struct tty_stats *thread_two_stats;
 	char *my_file_name;
@@ -78,6 +79,11 @@ void *thread_two_main(void *thread_two_struct)
 			return NULL;
 		}
 
+		/* re-init counts to 0 for each USR1 signal */
+		local_chars = 0;
+		local_words = 0;
+		local_lines = 0;
+
 		in_file = fopen(my_file_name, "r");
 		printf("[multithread_io][thread2] opened file %s\n", my_file_name);
 		fseek(in_file, 0, SEEK_SET);
@@ -87,17 +93,20 @@ void *thread_two_main(void *thread_two_struct)
 		while(c != EOF)
 		{
 			c = fgetc(in_file);
-			pthread_mutex_lock(&global_mutex);
-			thread_two_stats->num_chars++;
+			local_chars++;
 			if (c == CHAR_SPACE)
 			{
-				/* TODO fixme get real words not just spaces */
-				thread_two_stats->num_words++;
+				local_words++;
 			}
 			else if (c == CHAR_NEWLINE)
 			{
-				thread_two_stats->num_lines++;
+				local_lines++;
 			}
+
+			pthread_mutex_lock(&global_mutex);
+			thread_two_stats->num_chars = local_chars;
+			thread_two_stats->num_words = local_words;
+			thread_two_stats->num_lines = local_lines;
 			pthread_mutex_unlock(&global_mutex);
 		}
 		fclose(in_file);
@@ -130,6 +139,7 @@ void *thread_three_main(void *thread_three_struct)
 		}
 
 		
+		/* protect changes to global struct via mutex lock+unlock */
 		pthread_mutex_lock(&global_mutex);
 		local_chars = thread_three_stats->num_chars;
 		local_words = thread_three_stats->num_words;
@@ -236,7 +246,7 @@ int main(int argc, char *argv[])
 	}
 	
 	/* Run the main thread0 process*/
-	printf("\tPlease type input:\n");
+	printf("\tPlease type input- only chars %d-%d are counted for char:\n", ASCII_START, ASCII_STOP);
 	while (thread1_state == IS_RUNNING)
 	{
 		input_char = getchar();
@@ -244,13 +254,16 @@ int main(int argc, char *argv[])
 	
 		out_file = fopen(out_file_name, "a");
 
-		if (input_char > 0)
+		if ((input_char >= ASCII_START) && (input_char <= ASCII_STOP))
 		{
 			fputc(input_char,out_file);
 		}
+		else if ((input_char == CHAR_CR) || (input_char == CHAR_NEWLINE))
+		{
+			fputc(input_char, out_file);
+		}
 		fclose(out_file);
 	}
-	//fclose(out_file);
 
 	/* on close, reap thread_two */
 	if (pthread_join(thread_two, NULL) != 0)

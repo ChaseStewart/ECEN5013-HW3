@@ -18,6 +18,8 @@
 #define CHAR_CR       13
 #define CHAR_NEWLINE  10
 #define CHAR_SPACE    32
+#define ASCII_START   32
+#define ASCII_STOP    127
 
 /* set globals for thread states */
 static volatile int thread1_state = IS_RUNNING; 
