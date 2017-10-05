@@ -17,7 +17,8 @@ int print_kernel_threads(void)
 	my_task_name = (char *)kmalloc(2048*sizeof(char), GFP_KERNEL);
 
 	/* For each process in linux processes, get name, pid, status, num_children */
-	for_each_process(my_taskstruct){	
+	for(my_taskstruct = current; my_taskstruct != &init_task; my_taskstruct = my_taskstruct->parent)	
+	{
 		/* get args from the task_struct*/
 		my_task_state = my_taskstruct->state;
 		my_pid        = my_taskstruct->pid;
