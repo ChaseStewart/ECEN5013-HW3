@@ -12,15 +12,6 @@ This is the detailed description
 ## Outputs
 * Output: does something
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
+## Notes 
+blah blah blah...
 

@@ -1,5 +1,5 @@
 # pthread_mutex_destroy 
-Destroy the given mutex __mutex and free all resources
+Destroy the given mutex __mutex and free all resources associated with it
 
 ```
 extern int pthread_mutex_destroy (pthread_mutex_t *__mutex)
@@ -15,15 +15,5 @@ This function destroys mutex __mutex if possible and frees its resources. The gi
 ## Outputs
 * int: return int status of pthread_mutex_destroy
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
-
+## Notes 
+Call this on a mutex to destroy it when no longer in use.

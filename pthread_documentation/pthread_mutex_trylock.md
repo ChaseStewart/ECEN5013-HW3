@@ -15,17 +15,5 @@ Attempt to lock the mutex- if the mutex is unlocked at that instant, it will bec
 ## Outputs
 * int: return the status of pthread_mutex_lock
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
-
-
-
+## Notes
+If this is used, one should *DEFINITELY* check the status of this call and use it to see whether the mutex is grabbed. Also, if one wants the mutex to always be grabbed even if blocking is required, look at pthread_mutex_lock.md. If mutexes need to be used in an interrupt, this would be a good choice.

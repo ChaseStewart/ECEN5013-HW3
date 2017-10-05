@@ -15,15 +15,5 @@ Attempt to unlock the mutex- depending on the type of mutex, this function will 
 ## Outputs
 * int: return the status of pthread_mutex_unlock
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
-
+## Notes
+Once again and just like all pthread-related functions, one should *really* check the return status of the function to ensure everything is going according to plan.

@@ -17,15 +17,5 @@ This function initializes the mutex object pointed to by __mutex using the attri
 ## Outputs
 * int: return the status of pthread_mutex_init 
 
-## example code
-to run the command
-
-```bash
-int retval;
-retval = run_command(parameter1, parameter2);
-
-/* retval should equal 0 */
-
-```
-
-
+## Notes
+There are getters and setters for mutexattr_t values and defaults detailed in the pthread.h header file.
