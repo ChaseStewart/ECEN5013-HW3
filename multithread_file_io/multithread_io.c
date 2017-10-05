@@ -64,8 +64,6 @@ void *thread_two_main(void *thread_two_struct)
 	my_file_name = data_struct->file_name;
 	thread_two_stats = &data_struct->stats;
 
-	in_file = fopen(my_file_name, "r");
-	printf("[multithread_io][thread2] opened file %s\n", my_file_name);
 
 	/* Loop until this state is set to IS_STOPPED by sigint_handler */
 	while(thread2_state == IS_RUNNING)
@@ -77,10 +75,14 @@ void *thread_two_main(void *thread_two_struct)
 		if(thread2_state == IS_STOPPED)
 		{
 			printf("[multithread_io][thread2] thread 2 dead!\n");
-			fclose(in_file);
 			return NULL;
 		}
 
+		in_file = fopen(my_file_name, "r");
+		printf("[multithread_io][thread2] opened file %s\n", my_file_name);
+		fseek(in_file, 0, SEEK_SET);
+
+		c = 34;
 		/* read the whole file, increment vars  */
 		while(c != EOF)
 		{
@@ -98,10 +100,11 @@ void *thread_two_main(void *thread_two_struct)
 			}
 			pthread_mutex_unlock(&global_mutex);
 		}
+		fclose(in_file);
 	}
 	/* Should never get here, but clean up anyways  */
 	printf("[multithread_io][thread2] thread 2 dead- should never get here!\n");
-	fclose(in_file);
+	//fclose(in_file);
 	return NULL;
 }
 
@@ -206,13 +209,13 @@ int main(int argc, char *argv[])
 	}
 
 	/* open the file for writing */
-	out_file = fopen(out_file_name, "a");
-	if (out_file == NULL)
-	{
-		printf("\n[multithread_io][thread1] ERROR: Failed to open file! Closing...\n");
-		exit(1);
-	}
-	printf("[multithread_io][thread1] File %s opened\n", out_file_name);
+	//out_file = fopen(out_file_name, "a");
+	//if (out_file == NULL)
+	//{
+	//	printf("\n[multithread_io][thread1] ERROR: Failed to open file! Closing...\n");
+	//	exit(1);
+	//}
+	//printf("[multithread_io][thread1] File %s opened\n", out_file_name);
 	
 	thread_info = (struct my_thread_info *)malloc(sizeof(struct my_thread_info));
 	thread_info->file_name  = out_file_name;
@@ -238,13 +241,16 @@ int main(int argc, char *argv[])
 	{
 		input_char = getchar();
 		putchar(input_char);
+	
+		out_file = fopen(out_file_name, "a");
 
 		if (input_char > 0)
 		{
 			fputc(input_char,out_file);
 		}
+		fclose(out_file);
 	}
-	fclose(out_file);
+	//fclose(out_file);
 
 	/* on close, reap thread_two */
 	if (pthread_join(thread_two, NULL) != 0)
