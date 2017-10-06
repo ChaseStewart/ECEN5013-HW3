@@ -16,10 +16,12 @@
  * @version 1.1
  *
  */
-#include <time.h>
+#include <unistd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <pthread.h>
+
+static pthread_mutex_t my_mutex;
 
 /*
  * @brief short task for thread to do,  
@@ -32,15 +34,21 @@
  */
 void *pthread_example(void *void_tid)
 {
-	int thread_id;
-	int *tid_ptr = (int *)void_tid;
-	
-	thread_id = pthread_self();
-	if (thread_id != 0)
+	int status;
+	printf("[demo-pthread-mutex][thread1] Initialize thread1\n");
+	printf("[demo-pthread-mutex][thread1] pthread_mutex_trylock() will instantly fail bc main has the lock\n");
+	status = pthread_mutex_trylock(&my_mutex);
+	if (status != 0)
 	{
-		printf("[profile-pthread][thread %d] Hello from thread %d\n", thread_id, thread_id);
-		*tid_ptr = thread_id;
+		printf("[demo-pthread-mutex][thread1] Trylock failed!\n");
 	}
+	
+	printf("[demo-pthread-mutex][thread1] Now running mutex_lock- it will block until main releases it \n");
+	pthread_mutex_lock(&my_mutex);
+	printf("[demo-pthread-mutex][thread1] Got the lock!\n");
+	pthread_mutex_unlock(&my_mutex);
+	printf("[demo-pthread-mutex][thread1] Released the lock!\n");
+	printf("[demo-pthread-mutex][thread1] Exiting!\n"); 
 	return NULL;
 }
 
@@ -48,7 +56,7 @@ void *pthread_example_2(void *void_tid)
 {
 	int status = 2;
 	
-	printf("[profile-pthread][thread 2] Exiting with status %d \n", status);
+	printf("[demo-pthread-mutex][thread 2] Exiting with status %d \n", status);
 	pthread_exit((void *)&status);
 }
 
@@ -62,36 +70,39 @@ void *pthread_example_2(void *void_tid)
  */
 int main(void)
 {
-	pthread_t my_thread_1, my_thread_2;
+	pthread_t my_thread_1;
+	printf("[demo-pthread-mutex][main] This program will demonstrate mutex_init, mutex_lock, mutex_destroy, mutex_lock, mutex_trylock, mutex_unlock\n");
+
+		
+	printf("[demo-pthread-mutex][main] initialize mutex w default parameters\n");
+	pthread_mutex_init(&my_mutex, NULL);
+
+
+	printf("[demo-pthread-mutex][main] now lock the mutex for 5 seconds before spawning threads\n");
+	pthread_mutex_lock(&my_mutex);
 
 	/* call pthread_create and have it run my_hello above */
 	if(pthread_create(&my_thread_1, NULL, pthread_example, NULL) != 0)
 	{
-		printf("[profile-pthread][main] failed to create pthread\n");
+		printf("[demo-pthread-mutex][main] failed to create pthread\n");
 		return 1;
 	}
-	/* call pthread_create and have it run my_hello above */
-	if(pthread_create(&my_thread_2, NULL, pthread_example_2, NULL) != 0)
-	{
-		printf("[profile-pthread][main] failed to create pthread\n");
-		return 1;
-	}
+	sleep(5);
+	printf("[demo-pthread-mutex][main] now releasing the mutex\n");
+	pthread_mutex_unlock(&my_mutex);
 
-	/* have main process wait to join w/ created pthread*/
-	if (pthread_join(my_thread_2, NULL) != 0)
-	{
-		printf("[profile-pthread][main] failed to join with pthread\n");
-		return 1;
-	}
-	
 	/* have main process wait to join w/ created pthread*/
 	if (pthread_join(my_thread_1, NULL) != 0)
 	{
-		printf("[profile-pthread][main] failed to join with pthread\n");
+		printf("[demo-pthread-mutex][main] failed to join with pthread\n");
 		return 1;
 	}
+		printf("[demo-pthread-mutex][main] joined with thread1\n");
 	
-	printf("[demo-pthread] Complete- exiting!\n");
+	printf("[demo-pthread-mutex][main] destroy mutex\n");
+	pthread_mutex_destroy(&my_mutex);
+	
+	printf("[demo-pthread-mutex] Complete- exiting!\n");
 	return 0;
 }
 
