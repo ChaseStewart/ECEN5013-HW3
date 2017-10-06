@@ -15,3 +15,5 @@ This is the detailed description
 ## Notes 
 blah blah blah...
 
+## Example Code
+Please see path/to/file.c 

@@ -17,4 +17,6 @@ This destroys condition variable __cond and frees any resources if need be. The 
 
 ## Notes
 Think of this as equivalent to a free() of an initialized pthread condition variable. Anything that you pthread_cond_init should be freed via pthread_cond_destroy when you know that the condition variable is no longer needed.
- 
+
+## Example Code
+Please see examples/pthread_cond_example.c 

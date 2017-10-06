@@ -23,4 +23,6 @@ This creates and starts a new pthread within the process that called this functi
 ## Notes 
 To run pthread_create, a few main things need to happen: Function Fn (which the thread will execute) must be created and the desired set of input vars must also be instantiated. The task_struct pointer for the output must also be created if it does not already exist, Finally, all of these must be passed into the function.
 
+## Example Code
+Please see examples/pthread_example.c 
 

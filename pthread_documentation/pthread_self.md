@@ -16,3 +16,6 @@ As there is no way for pthread_create to give the created thread its pthread_t I
 
 ## Notes
 This is a pretty dead-simple function, but necessary bc of the reason in Description. Be aware the returned ID is of type pthread_t.
+
+## Example Code
+Please see examples/pthread_example.c 

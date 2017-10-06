@@ -17,3 +17,6 @@ This function destroys mutex __mutex if possible and frees its resources. The gi
 
 ## Notes 
 Call this on a mutex to destroy it when no longer in use.
+
+## Example Code
+Please see examples/pthread_mutex_example.c 

@@ -17,3 +17,6 @@ Attempt to unlock the mutex- depending on the type of mutex, this function will 
 
 ## Notes
 Once again and just like all pthread-related functions, one should *really* check the return status of the function to ensure everything is going according to plan.
+
+## Example Code
+Please see examples/pthread_mutex_example.c 

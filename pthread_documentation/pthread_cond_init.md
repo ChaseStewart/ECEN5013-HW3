@@ -21,3 +21,5 @@ __cond_attr is blank, pthread_cond_init will use the default parameters to initi
 ## Notes
 If you plan to use pthread condition variables, this should be called on each variable and checked for success before using pthread_cond_wait or pthread_cond_signal/broadcast
 
+## Example Code
+Please see examples/pthread_cond_example.c 

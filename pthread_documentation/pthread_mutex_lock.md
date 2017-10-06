@@ -18,3 +18,5 @@ Attempt to lock the mutex- if the mutex is unlocked at that instant, it will bec
 ## Notes
 Pthread_mutex_lock is blocking- if this is undesirable, see pthread_mutex_trylock.md. Don't use this in an interrupt dude! 
 
+## Example Code
+Please see examples/pthread_mutex_example.c 

@@ -19,3 +19,6 @@ This function initializes the mutex object pointed to by __mutex using the attri
 
 ## Notes
 There are getters and setters for mutexattr_t values and defaults detailed in the pthread.h header file.
+
+## Example Code
+Please see examples/pthread_mutex_example.c 

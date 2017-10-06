@@ -19,3 +19,5 @@ This function first initializes pthread_attr_t __attr, then takes the current pt
 ## Notes
 The manpages state that the attributes returned by this function MAY NOT BE the same attributes which were passed in at initialization. They also emphasize that pthread_attr_ts formed in this way should be destroyed with pthread_attr_destroy() when one is done with them.
 
+## Example Code
+Please see examples/pthread_example.c 

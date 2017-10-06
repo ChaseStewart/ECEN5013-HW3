@@ -17,3 +17,6 @@ This function takes in a pthread_attr_t pointer, and then sets the default for a
 
 ## Notes
 Once again pretty straightforward, initialize a pthread_attr_t pointer with the values one desires to be the default, then call this before initializing all threads.
+
+## Example Code
+Please see examples/pthread_example.c 

@@ -19,3 +19,6 @@ Once this command is called, calling thread will wait until pthread_cond_t __con
 
 ## Notes
 This is pretty straight-forward, have a thread wait in a suspended state until awoken
+
+## Example Code
+Please see examples/pthread_cond_example.c 

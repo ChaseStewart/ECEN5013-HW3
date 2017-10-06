@@ -18,3 +18,5 @@ Since pthread_setattr_np() is able to set the default attributes for a new threa
 ## Notes
 This one is pretty self-explanatory, this command tells you what kind of pthread will be created when the pthread_attr_t arg in pthread_create() is NULL- however the man pages offer some details for this- the stack address should not be set, and there should be no invalid attribute settings in the provided object
 
+## Example Code
+Please see examples/pthread_example.c 
