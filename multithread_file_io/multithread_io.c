@@ -189,6 +189,7 @@ void *thread_two_main(void *thread_two_struct)
 			{
 				enter_tab->data = (unsigned long * )enter_tab->data +1;
 				temp = (unsigned long) enter_tab->data/8;
+				printf("word:%s value:%lu \n", enter_tab->key, temp);
 				hsearch(*enter_tab, ENTER);
 			}
 		}
