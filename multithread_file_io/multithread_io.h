@@ -18,6 +18,8 @@
  *
  */
 
+#define _GNU_SOURCE
+
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -26,6 +28,8 @@
 #include <sys/wait.h>
 #include <getopt.h>
 #include <signal.h>
+#include <string.h>
+#include <search.h>
 
 /* state variables */
 #define IS_RUNNING    0
@@ -33,6 +37,8 @@
 
 /* misc variables */
 #define INPUT_LEN     4096
+#define HASHMAP_SIZE  2048 // for performance
+#define MAX_WORD      2048 // for performance
 
 /* char values */
 #define CHAR_CR       13
@@ -66,6 +72,18 @@ struct tty_stats {
 struct my_thread_info {
 	char *file_name;
 	struct tty_stats stats;
+};
+
+/* single object in dictionary */
+struct dict_object{
+	char *word;
+	int count;
+};
+
+/* whole dictionary */
+struct my_hashmap{
+	int total_len;
+	struct dict_object **map;
 };
 
 /* command-line options */

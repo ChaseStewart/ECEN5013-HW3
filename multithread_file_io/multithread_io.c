@@ -10,7 +10,7 @@
  * @file multithread_io.c
  * @brief source code for the multithreaded file IO program
  *
- * 
+* 
  *
  * @author Chase E Stewart
  * @date October 5 2017
@@ -19,6 +19,8 @@
  */
 
 #include "multithread_io.h"
+
+
 
 /* SIGUSR1 SIGUSR2 mutexes and condition variables */
 static volatile struct tty_stats *my_stats;
@@ -103,11 +105,21 @@ void *thread_two_main(void *thread_two_struct)
 	char *my_file_name;
 	FILE *in_file;
 	char c, lastchar; 
+	char *word;
+	static ENTRY *search_tab;
+	static ENTRY *enter_tab;
+	unsigned long temp;
+	
+	
+
+	search_tab = (ENTRY *)malloc(sizeof(ENTRY));
+	enter_tab = (ENTRY *)malloc(sizeof(ENTRY));
 
 	data_struct = (struct my_thread_info *)thread_two_struct;
 	my_file_name = data_struct->file_name;
 	thread_two_stats = &data_struct->stats;
 
+	word = (char *)malloc(sizeof(char) * MAX_WORD);
 
 	/* Loop until this state is set to IS_STOPPED by sigint_handler */
 	while(thread2_state == IS_RUNNING)
@@ -131,7 +143,7 @@ void *thread_two_main(void *thread_two_struct)
 		printf("[multithread_io][thread2] opened file %s\n", my_file_name);
 		fseek(in_file, 0, SEEK_SET);
 
-		lastchar = EOF;
+		lastchar = 0;
 		c = 34;
 		/* read the whole file, increment vars  */
 		while(c != EOF)
@@ -160,11 +172,32 @@ void *thread_two_main(void *thread_two_struct)
 			pthread_mutex_unlock(&global_mutex);
 			lastchar = c;
 		}
+		
+		fseek(in_file, 0, SEEK_SET);
+		hcreate(4096);
+
+		while(fscanf(in_file, "%2048s", word) == 1) /* MAX_WORD = 2048 */ 
+		{
+			search_tab->data = 0;
+			search_tab->key = word;
+			enter_tab = hsearch(*search_tab, FIND);
+			if(enter_tab == NULL)
+			{
+				enter_tab = hsearch(*search_tab, ENTER);
+			}
+			else
+			{
+				enter_tab->data = (unsigned long * )enter_tab->data +1;
+				temp = (unsigned long) enter_tab->data/8;
+				hsearch(*enter_tab, ENTER);
+			}
+		}
+
+		hdestroy();
 		fclose(in_file);
 	}
 	/* Should never get here, but clean up anyways  */
 	printf("[multithread_io][thread2] thread 2 dead- should never get here!\n");
-	//fclose(in_file);
 	return NULL;
 }
 
@@ -257,7 +290,7 @@ int main(int argc, char *argv[])
 	my_stats->num_chars =0;
 	my_stats->num_words =0;
 	my_stats->num_lines =0;
-
+	
 	/* if no args provided, print help and exit */
 	if (argc == 1)
 	{
